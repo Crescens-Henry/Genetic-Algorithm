@@ -2,43 +2,9 @@ import tkinter as tk
 from tkinter import ttk
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-import random
-
-
-def section(parent, title):
-    frame = ttk.Frame(parent, padding=(10, 0, 10, 0))
-    frame.grid(sticky=(tk.N, tk.W, tk.E, tk.S), padx=5, pady=5)
-    frame.columnconfigure(1, weight=1)
-    ttk.Label(frame, text=title, font=('Helvetica', 12, 'bold')).grid(column=0, row=0, sticky=(tk.W, tk.E), padx=(0, 5),
-                                                                      pady=(0, 5))
-    return frame
-
-
-def set_widget_width(widget, width):
-    widget.config(width=width)
-
-
-def update_graph(x_values, y_values1, y_values2, y_values3, ax):
-    ax.clear()
-    ax.plot(x_values, y_values1, label='Data 1')
-    ax.plot(x_values, y_values2, label='Data 2')
-    ax.plot(x_values, y_values3, label='Data 3')
-    ax.legend()
-    ax.set_title('Fluctuación de Datos en Tiempo Real')
-    ax.set_xlabel('Tiempo')
-    ax.set_ylabel('Valor')
-
-
-def generate_random_data():
-    return random.random() * 10
-
-
-def update_data(x_values, y_values1, y_values2, y_values3):
-    x_values.append(len(x_values))
-    y_values1.append(generate_random_data())
-    y_values2.append(generate_random_data())
-    y_values3.append(generate_random_data())
-
+from Layout.Models.Table import create_table, update_table
+from Layout.Models.LineChart import update_graph, update_data
+from Layout.UIUtils import section, set_widget_width
 
 def Interface():
     root = tk.Tk()
@@ -93,20 +59,7 @@ def Interface():
 
     frame_table = ttk.Frame(root, padding=10)
     frame_table.grid(row=5, column=0, columnspan=2, pady=10)
-    tree = ttk.Treeview(frame_table, columns=("ID", "Individuo", "i", "X", "f(x)"), show="headings")
-    tree.heading("ID", text="ID")
-    tree.heading("Individuo", text="Individuo")
-    tree.heading("i", text="i")
-    tree.heading("X", text="X")
-    tree.heading("f(x)", text="f(x)")
-    tree.column("ID", anchor="center", width=90)
-    tree.column("Individuo", anchor="center", width=90)
-    tree.column("i", anchor="center", width=90)
-    tree.column("X", anchor="center", width=90)
-    tree.column("f(x)", anchor="center", width=90)
-    tree.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
-    frame_table.columnconfigure(0, weight=1)
-    frame_table.rowconfigure(0, weight=1)
+    tree = create_table(frame_table)
 
     fig, ax = plt.subplots()
     canvas = FigureCanvasTkAgg(fig, master=root)
@@ -121,6 +74,7 @@ def Interface():
     def update():
         update_data(x_values, y_values1, y_values2, y_values3)
         update_graph(x_values, y_values1, y_values2, y_values3, ax)
+        update_table(tree, x_values, y_values1, y_values2, y_values3)
         canvas.draw()
         root.after(1000, update)
 
