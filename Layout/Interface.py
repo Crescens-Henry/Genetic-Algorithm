@@ -5,12 +5,27 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from Layout.Models.Table import create_table, update_table
 from Layout.Models.LineChart import update_graph, update_data
 from Layout.UIUtils import section, set_widget_width
+from GeneticAlgorithm.AlgorithmPrincipal import process_equation
+
 
 def Interface():
     root = tk.Tk()
     root.title("Algoritmos Genéticos By Crescens")
 
     entry_width = 8
+
+    frame_init = section(root, "Ecuacion principal:")
+    ttk.Label(frame_init, text="f(x):").grid(column=0, row=1, sticky=tk.W, padx=5, pady=5)
+    equation = ttk.Entry(frame_init, width=entry_width)
+    equation.grid(column=1, row=1, sticky=(tk.W, tk.E), pady=1)
+    # Etiquetas para mostrar los resultados
+    ttk.Label(frame_init, text="Resultado Máximo:").grid(column=0, row=2, sticky=tk.W, pady=1)
+    max_result_label = ttk.Label(frame_init, text="")
+    max_result_label.grid(column=1, row=2, sticky=tk.W, pady=1)
+
+    ttk.Label(frame_init, text="Resultado Mínimo:").grid(column=0, row=3, sticky=tk.W, pady=1)
+    min_result_label = ttk.Label(frame_init, text="")
+    min_result_label.grid(column=1, row=3, sticky=tk.W, pady=1)
 
     frame_poblacion = section(root, "Tamaño de la Población")
     ttk.Label(frame_poblacion, text="Tamaño Inicial:").grid(column=0, row=1, sticky=tk.W, pady=1)
@@ -71,12 +86,24 @@ def Interface():
     y_values2 = []
     y_values3 = []
 
+    def handle_button_click():
+        equation_value = equation.get()
+        print(equation_value)
+
+        minimo, maximo = process_equation(equation_value)
+
+        max_result_label.config(text=f"{maximo}")
+        min_result_label.config(text=f"{minimo}")
+
+    button = ttk.Button(frame_init, text="Start", command=handle_button_click)
+    button.grid(column=2, row=1, sticky=tk.W, padx=5, pady=5)
+
     def update():
         update_data(x_values, y_values1, y_values2, y_values3)
         update_graph(x_values, y_values1, y_values2, y_values3, ax)
         update_table(tree, x_values, y_values1, y_values2, y_values3)
         canvas.draw()
-        root.after(1000, update)
+        root.after(5000, update)
 
     update()
 
