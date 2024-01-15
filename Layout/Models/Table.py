@@ -1,8 +1,10 @@
 import tkinter as tk
 from tkinter import ttk
 
+
 def create_table(frame):
-    tree = ttk.Treeview(frame, columns=("ID", "Individuo", "i", "X", "f(x)"), show="headings")
+    tree = ttk.Treeview(frame, columns=("ID", "Individuo",
+                        "i", "X", "f(x)"), show="headings")
     tree.heading("ID", text="ID")
     tree.heading("Individuo", text="Individuo")
     tree.heading("i", text="i")
@@ -19,9 +21,15 @@ def create_table(frame):
 
     return tree
 
-def update_table(tree, x_values, y_values1, y_values2, y_values3):
-    values = list(zip(x_values, y_values1, y_values2, y_values3))
-    for i in tree.get_children():
-        tree.delete(i)
-    for i, (x, y1, y2, y3) in enumerate(values, start=1):
-        tree.insert("", "end", values=(i, f"Individuo {i}", f"i {i}", f"X {i}", f"f(x) {i}"))
+
+def llenar_tabla(poblacion, tabla):
+    for i, individuo in enumerate(poblacion):
+        # Convierte el número 'i' del individuo a binario y quita el prefijo '0b'
+        individuo_binario = bin(individuo.i)[2:].zfill(5)
+
+        # Format the 'individuo.x' value as a floating-point number with 2 decimal places
+        individuo_x = "{:.2f}".format(individuo.x)
+
+        # Inserta una nueva fila en la tabla
+        tabla.insert("", "end", values=(
+            i + 1, individuo_binario, individuo.i, individuo_x, individuo.fx))

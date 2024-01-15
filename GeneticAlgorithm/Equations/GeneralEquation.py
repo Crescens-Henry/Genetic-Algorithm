@@ -13,7 +13,7 @@ def solve_quadratic(a, b, c):
 def solve_trigonometric(equation):
     x = symbols('x')
     sol = solve(eval(equation), x)
-    return [s.evalf() for s in sol]
+    return [float(s.evalf()) for s in sol]
 
 
 def parse_and_solve(equation):

@@ -12,14 +12,3 @@ def update_graph(x_values, y_values1, y_values2, y_values3, ax):
     ax.set_title('Fluctuación de Datos en Tiempo Real')
     ax.set_xlabel('Tiempo')
     ax.set_ylabel('Valor')
-
-
-def generate_random_data():
-    return random.random() * 10
-
-
-def update_data(x_values, y_values1, y_values2, y_values3):
-    x_values.append(len(x_values))
-    y_values1.append(generate_random_data())
-    y_values2.append(generate_random_data())
-    y_values3.append(generate_random_data())
