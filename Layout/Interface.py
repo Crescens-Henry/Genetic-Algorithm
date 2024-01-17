@@ -1,8 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 import matplotlib.pyplot as plt
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from Layout.Models.Table import create_table, insertar_datos
+from Layout.Models.Table import create_table
 from Layout.UIUtils import section, set_widget_width
 from GeneticAlgorithm.AlgorithmPrincipal import AlgoritmoGenetico, Individuo
 
@@ -18,6 +17,7 @@ def Interface():
     equation = ttk.Entry(frame_init, width=entry_width)
     equation.insert(0, "x**3-x**3*cos(5*x)")
     equation.grid(column=1, row=1, sticky=(tk.W, tk.E), pady=1)
+    
     ttk.Label(frame_init, text="Valor máximo para X:").grid(
         column=0, row=2, sticky=tk.W, pady=1)
     max_result_entry = ttk.Entry(frame_init, width=entry_width)
@@ -29,6 +29,12 @@ def Interface():
     min_result_entry = ttk.Entry(frame_init, width=entry_width)
     min_result_entry.insert(0, "2")
     min_result_entry.grid(column=1, row=3, sticky=(tk.W, tk.E), pady=1)
+    
+    ttk.Label(frame_init, text="Iteraciones:").grid(
+        column=0, row=4, sticky=tk.W, pady=1)
+    iteraciones = ttk.Entry(frame_init, width=entry_width)
+    iteraciones.insert(0, "100")
+    iteraciones.grid(column=1, row=4, sticky=(tk.W, tk.E), pady=1)
 
     frame_poblacion = section(root, "Tamaño de la Población")
     ttk.Label(frame_poblacion, text="Tamaño Inicial:").grid(
@@ -77,38 +83,22 @@ def Interface():
         equation_value = equation.get()
         print(equation_value)
         
-        # Obtener los valores de las entradas
         min_result = int(min_result_entry.get())
         max_result = int(max_result_entry.get())
-
+        
+        iteration = int(iteraciones.get())
+        
         initial_population_value = int(initial_population.get())
         entry_prob_cruza_value = float(entry_prob_cruza.get())
         limit_population_value = int(limit_population.get())
         individual_mutation_value = float(individual_mutation.get())
         gene_mutation_value = float(gene_mutation.get())
-        minimo, maximo = Individuo.obtener_minimo_maximo(equation_value, min_result, max_result)
-        print("minimo",minimo,"maximo:", maximo)
-        algoritmo = AlgoritmoGenetico(
-            initial_population_value, 
-            min_result, 
-            max_result, 
-            minimo,
-            maximo,
-            5,  # Este es el valor para 'bits'
-            equation_value  # Este es el valor para 'ecuacion'
-        )
-        insertar_datos(tree, algoritmo.poblacion)
-        print("Población inicial:")
-        for individuo in algoritmo.poblacion:
-            print(individuo.individuo,individuo.i, individuo.x, individuo.fx)
-        seleccionar_padres = AlgoritmoGenetico.seleccionar_padres(algoritmo, algoritmo.poblacion, 0.8)#porcentaje de individuos para que se crucen
-        cruza = AlgoritmoGenetico.cruza(algoritmo, seleccionar_padres, entry_prob_cruza_value)
-        mutex = AlgoritmoGenetico.mutex(algoritmo, cruza, individual_mutation_value, gene_mutation_value)
-        individuos_hijos = Individuo.convertir_hijos(mutex, min_result, max_result, minimo, maximo, 5, equation_value)
         
-        # Supongamos que hijos es la lista de objetos Individuo que son los hijos después del cruce
-        insertar_datos(tree, individuos_hijos, es_poblacion_inicial=False)
-
+        minimo, maximo = Individuo.obtener_minimo_maximo(equation_value, min_result, max_result)
+        
+        algoritmo = AlgoritmoGenetico(initial_population_value, min_result, max_result, minimo, maximo, 5, equation_value)
+        algoritmo.ejecutar(iteration, equation_value, min_result, max_result, initial_population_value, entry_prob_cruza_value, limit_population_value, individual_mutation_value, gene_mutation_value, tree)
+                
 
     button = ttk.Button(frame_init, text="Minimizacion",
                         command=handle_minimize_button_click)

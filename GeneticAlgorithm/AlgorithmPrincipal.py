@@ -1,6 +1,9 @@
 import random
 from sympy import cos, sin, symbols
 import sympy as sp
+from Layout.Models.Table import insertar_datos
+
+
 class Individuo:
     def __init__(self, id, individuo, i, min_resultado, max_resultado, minimo, maximo, bits, ecuacion):
         self.id = id
@@ -94,6 +97,28 @@ class AlgoritmoGenetico:
         for i, hijo in enumerate(hijos):
             print(f"Hijo {i+1}: {hijo}")
         return hijos
+    
+    def ejecutar(self, num_iteraciones, equation_value, min_result, max_result, initial_population_value, entry_prob_cruza_value, limit_population_value, individual_mutation_value, gene_mutation_value, tree):
+        porcentaje_cruce = 0.5  # Define tu propio valor
 
+        for _ in range(num_iteraciones):
+            print("Iteración:", _+1)
+            minimo, maximo = Individuo.obtener_minimo_maximo(equation_value, min_result, max_result)
+            print("minimo",minimo,"maximo:", maximo)
 
+            insertar_datos(tree, self.poblacion)
+            print("Población inicial:")
+            for individuo in self.poblacion:
+                print(individuo.individuo,individuo.i, individuo.x, individuo.fx)
+
+            seleccionar_padres = self.seleccionar_padres(self.poblacion, porcentaje_cruce)
+            cruza = self.cruza(seleccionar_padres, entry_prob_cruza_value)
+            mutex = self.mutex(cruza, individual_mutation_value, gene_mutation_value)
+            individuos_hijos = Individuo.convertir_hijos(mutex, min_result, max_result, minimo, maximo, 5, equation_value)
             
+            insertar_datos(tree, individuos_hijos, es_poblacion_inicial=False)
+            self.poblacion.extend(individuos_hijos)  # Agrega los hijos a la población existente
+
+            """ # Si la población se vuelve demasiado grande, puedes eliminar algunos individuos
+            if len(self.poblacion) > limit_population_value:
+                self.poblacion = self.seleccionar_mejores(self.poblacion, limit_population_value) """

@@ -1,6 +1,5 @@
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-import random
 
 
 def update_graph(x_values, y_values1, y_values2, y_values3, ax):
