@@ -2,22 +2,13 @@ import tkinter as tk
 from tkinter import ttk
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from Layout.Models.Table import create_table, llenar_tabla
+from Layout.Models.Table import create_table, insertar_datos
 from Layout.UIUtils import section, set_widget_width
-from GeneticAlgorithm.AlgorithmPrincipal import process_equation, Individuo, generar_poblacion_inicial
-
+from GeneticAlgorithm.AlgorithmPrincipal import AlgoritmoGenetico, Individuo
 
 def Interface():
     root = tk.Tk()
     root.title("Algoritmos Genéticos By Crescens")
-    # Obtiene las dimensiones de la ventana
-    window_width = root.winfo_reqwidth()
-    window_height = root.winfo_reqheight()
-    # Obtiene la posición en la pantalla
-    position_right = int(root.winfo_screenwidth()/2 - window_width/2)
-    position_down = int(root.winfo_screenheight()/2 - window_height/2)
-    # Posiciona la ventana en el centro de la pantalla
-    root.geometry("+{}+{}".format(position_right, position_down))
 
     entry_width = 8
 
@@ -25,28 +16,32 @@ def Interface():
     ttk.Label(frame_init, text="f(x):").grid(
         column=0, row=1, sticky=tk.W, padx=5, pady=5)
     equation = ttk.Entry(frame_init, width=entry_width)
+    equation.insert(0, "x**3-x**3*cos(5*x)")
     equation.grid(column=1, row=1, sticky=(tk.W, tk.E), pady=1)
-    # Etiquetas para mostrar los resultados
-    ttk.Label(frame_init, text="Resultado Máximo:").grid(
+    ttk.Label(frame_init, text="Valor máximo para X:").grid(
         column=0, row=2, sticky=tk.W, pady=1)
-    max_result_label = ttk.Label(frame_init, text="")
-    max_result_label.grid(column=1, row=2, sticky=tk.W, pady=1)
+    max_result_entry = ttk.Entry(frame_init, width=entry_width)
+    max_result_entry.insert(0, "20")
+    max_result_entry.grid(column=1, row=2, sticky=(tk.W, tk.E), pady=1)
 
-    ttk.Label(frame_init, text="Resultado Mínimo:").grid(
+    ttk.Label(frame_init, text="Valor minimo para X:").grid(
         column=0, row=3, sticky=tk.W, pady=1)
-    min_result_label = ttk.Label(frame_init, text="")
-    min_result_label.grid(column=1, row=3, sticky=tk.W, pady=1)
+    min_result_entry = ttk.Entry(frame_init, width=entry_width)
+    min_result_entry.insert(0, "2")
+    min_result_entry.grid(column=1, row=3, sticky=(tk.W, tk.E), pady=1)
 
     frame_poblacion = section(root, "Tamaño de la Población")
     ttk.Label(frame_poblacion, text="Tamaño Inicial:").grid(
         column=0, row=1, sticky=tk.W, pady=1)
     initial_population = ttk.Entry(frame_poblacion, width=entry_width)
+    initial_population.insert(0, "12")
     initial_population.grid(column=1, row=1, sticky=(tk.W, tk.E), pady=1)
     set_widget_width(initial_population, entry_width)
 
     ttk.Label(frame_poblacion, text="Tamaño Máximo:").grid(
         column=0, row=2, sticky=tk.W, pady=1)
     limit_population = ttk.Entry(frame_poblacion, width=entry_width)
+    limit_population.insert(0, "20")
     limit_population.grid(column=1, row=2, sticky=(tk.W, tk.E), pady=1)
     set_widget_width(limit_population, entry_width)
 
@@ -54,40 +49,22 @@ def Interface():
     ttk.Label(frame_mutacion, text="Por Individuo:").grid(
         column=0, row=1, sticky=tk.W, pady=1)
     individual_mutation = ttk.Entry(frame_mutacion, width=entry_width)
+    individual_mutation.insert(0, "0.65")
     individual_mutation.grid(column=1, row=1, sticky=(tk.W, tk.E), pady=1)
     set_widget_width(individual_mutation, entry_width)
 
     ttk.Label(frame_mutacion, text="Por Gen:").grid(
         column=0, row=2, sticky=tk.W, pady=1)
     gene_mutation = ttk.Entry(frame_mutacion, width=entry_width)
+    gene_mutation.insert(0, "0.45")
     gene_mutation.grid(column=1, row=2, sticky=(tk.W, tk.E), pady=1)
     set_widget_width(gene_mutation, entry_width)
-
-    frame_rango = section(root, "Rango de Posible Solución")
-    ttk.Label(frame_rango, text="Rango minimo de X:").grid(
-        column=0, row=1, sticky=tk.W, pady=1)
-    minimum_range_of_x = ttk.Entry(frame_rango, width=entry_width)
-    minimum_range_of_x.grid(column=1, row=1, sticky=(tk.W, tk.E), pady=1)
-
-    ttk.Label(frame_rango, text="Rango maximo de X:").grid(
-        column=2, row=1, sticky=tk.W, pady=1)
-    maximum_range_of_x = ttk.Entry(frame_rango, width=entry_width)
-    maximum_range_of_x.grid(column=3, row=1, sticky=(tk.W, tk.E), pady=1)
-
-    ttk.Label(frame_rango, text="Rango minimo de Y:").grid(
-        column=0, row=2, sticky=tk.W, pady=1)
-    minimum_range_of_y = ttk.Entry(frame_rango, width=entry_width)
-    minimum_range_of_y.grid(column=1, row=2, sticky=(tk.W, tk.E), pady=1)
-
-    ttk.Label(frame_rango, text="Rango maximo de Y:").grid(
-        column=2, row=2, sticky=tk.W, pady=1)
-    maximum_range_of_y = ttk.Entry(frame_rango, width=entry_width)
-    maximum_range_of_y.grid(column=3, row=2, sticky=(tk.W, tk.E), pady=1)
 
     frame_cruza = section(root, "Probabilidad de Cruza")
     ttk.Label(frame_cruza, text="Probabilidad de Cruza:").grid(
         column=0, row=1, sticky=tk.W, pady=1)
     entry_prob_cruza = ttk.Entry(frame_cruza, width=entry_width)
+    entry_prob_cruza.insert(0, "0.85")
     entry_prob_cruza.grid(column=1, row=1, sticky=(tk.W, tk.E), pady=1)
     set_widget_width(entry_prob_cruza, entry_width)
 
@@ -95,30 +72,53 @@ def Interface():
     frame_table.grid(row=5, column=0, columnspan=2, pady=10)
     tree = create_table(frame_table)
 
-    fig, ax = plt.subplots()
-    canvas = FigureCanvasTkAgg(fig, master=root)
-    canvas_widget = canvas.get_tk_widget()
-    canvas_widget.grid(row=0, column=5, rowspan=6, pady=10)
-
-    x_values = []
-    y_values1 = []
-    y_values2 = []
-    y_values3 = []
-
-    def handle_button_click():
+    def handle_minimize_button_click():
+        tree.delete(*tree.get_children())
         equation_value = equation.get()
-        initial_population_value = int(initial_population.get())
         print(equation_value)
+        
+        # Obtener los valores de las entradas
+        min_result = int(min_result_entry.get())
+        max_result = int(max_result_entry.get())
 
-        minimo, maximo = process_equation(equation_value)
+        initial_population_value = int(initial_population.get())
+        entry_prob_cruza_value = float(entry_prob_cruza.get())
+        limit_population_value = int(limit_population.get())
+        individual_mutation_value = float(individual_mutation.get())
+        gene_mutation_value = float(gene_mutation.get())
+        minimo, maximo = Individuo.obtener_minimo_maximo(equation_value, min_result, max_result)
+        print("minimo",minimo,"maximo:", maximo)
+        algoritmo = AlgoritmoGenetico(
+            initial_population_value, 
+            min_result, 
+            max_result, 
+            minimo,
+            maximo,
+            5,  # Este es el valor para 'bits'
+            equation_value  # Este es el valor para 'ecuacion'
+        )
+        insertar_datos(tree, algoritmo.poblacion)
+        print("Población inicial:")
+        for individuo in algoritmo.poblacion:
+            print(individuo.individuo,individuo.i, individuo.x, individuo.fx)
+        seleccionar_padres = AlgoritmoGenetico.seleccionar_padres(algoritmo, algoritmo.poblacion, 0.8)#porcentaje de individuos para que se crucen
+        cruza = AlgoritmoGenetico.cruza(algoritmo, seleccionar_padres, entry_prob_cruza_value)
+        mutex = AlgoritmoGenetico.mutex(algoritmo, cruza, individual_mutation_value, gene_mutation_value)
+        individuos_hijos = Individuo.convertir_hijos(mutex, min_result, max_result, minimo, maximo, 5, equation_value)
+        
+        # Supongamos que hijos es la lista de objetos Individuo que son los hijos después del cruce
+        insertar_datos(tree, individuos_hijos, es_poblacion_inicial=False)
 
-        max_result_label.config(text=f"{maximo}")
-        min_result_label.config(text=f"{minimo}")
-        poblacion = generar_poblacion_inicial(
-            initial_population_value, minimo, maximo, 5, equation_value)
-        llenar_tabla(poblacion, tree)
 
-    button = ttk.Button(frame_init, text="Start", command=handle_button_click)
+    button = ttk.Button(frame_init, text="Minimizacion",
+                        command=handle_minimize_button_click)
     button.grid(column=2, row=1, sticky=tk.W, padx=5, pady=5)
+
+    def handle_maximize_button_click():
+        pass
+
+    button = ttk.Button(frame_init, text="Maximizacion",
+                        command=handle_maximize_button_click)
+    button.grid(column=3, row=1, sticky=tk.W, padx=5, pady=5)
 
     root.mainloop()
