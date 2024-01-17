@@ -99,17 +99,18 @@ class AlgoritmoGenetico:
         return hijos
     
     def ejecutar(self, num_iteraciones, equation_value, min_result, max_result, initial_population_value, entry_prob_cruza_value, limit_population_value, individual_mutation_value, gene_mutation_value, tree):
-        porcentaje_cruce = 0.5  # Define tu propio valor
+        porcentaje_cruce = 0.5  # Algunos o todos para cruzar
 
         for _ in range(num_iteraciones):
             print("Iteración:", _+1)
             minimo, maximo = Individuo.obtener_minimo_maximo(equation_value, min_result, max_result)
             print("minimo",minimo,"maximo:", maximo)
 
-            insertar_datos(tree, self.poblacion)
-            print("Población inicial:")
-            for individuo in self.poblacion:
-                print(individuo.individuo,individuo.i, individuo.x, individuo.fx)
+            if _ == 0:
+                insertar_datos(tree, self.poblacion)
+                print("Población inicial:")
+                for individuo in self.poblacion:
+                    print(individuo.individuo,individuo.i, individuo.x, individuo.fx)
 
             seleccionar_padres = self.seleccionar_padres(self.poblacion, porcentaje_cruce)
             cruza = self.cruza(seleccionar_padres, entry_prob_cruza_value)
