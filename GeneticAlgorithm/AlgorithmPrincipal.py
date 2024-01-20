@@ -1,3 +1,4 @@
+import math
 import random
 from sympy import cos, sin, symbols
 import sympy as sp
@@ -5,121 +6,124 @@ from Layout.Models.Table import insertar_datos
 
 
 class Individuo:
-    def __init__(self, id, individuo, i, min_resultado, max_resultado, minimo, maximo, bits, ecuacion):
-        self.id = id
+    id_counter = 1
+    def __init__(self, individuo, i, minimo, maximo, delta_deseada, ecuacion):
+        self.id = Individuo.id_counter
+        Individuo.id_counter += 1
         self.individuo = individuo  
         self.i = i  
-        self.min_resultado = min_resultado
-        self.max_resultado = max_resultado
-        self.x = self.calcular_x(minimo, maximo, bits)
+        self.x = self.calcular_x(minimo, maximo, delta_deseada)
         self.fx = self.calcular_fx(ecuacion)
+        
+    def __str__(self):
+        return f"Individuo {self.id}: {self.individuo}, i: {self.i}, x: {self.x}, fx: {self.fx}"
 
-    def calcular_x(self, minimo, maximo, bits):
+    def calcular_bits (self, minimo, maximo, delta_deseada):
+        rango = maximo-minimo
+        saltos = math.ceil(rango/delta_deseada)+1
+        bits = math.ceil(math.log2(saltos))
+        return bits
+    
+    def calcular_x(self, minimo, maximo, delta_deseada):
+        bits = self.calcular_bits(minimo, maximo, delta_deseada)
         rango = maximo - minimo
         delta = rango / (2 ** bits - 1)
+        
+        if delta > delta_deseada:
+            delta = delta_deseada
+        elif delta < delta_deseada:
+            delta = delta
+        print(delta)
+        
         x = minimo + self.i * delta
         
-        return "{:.2f}".format(x)
+        return float("{:.2f}".format(x))
 
     def calcular_fx(self, ecuacion):
-        x = sp.symbols('x')
-        resultado = sp.sympify(ecuacion).subs(x, self.x)
-        return "{:.2f}".format(resultado)
+        try:
+            var = sp.symbols('x')
+            resultado = sp.sympify(ecuacion).subs(var, math.radians(self.x))
+            return float("{:.2f}".format(resultado))
+        except Exception as e:
+            print("Error al calcular fx:", e)
+            return None
     
-    def obtener_minimo_maximo(ecuacion_str, min_result, max_result):
-        x = sp.symbols('x')
-        ecuacion = sp.sympify(ecuacion_str)
-        
-        resultado_min = ecuacion.subs(x, min_result)
-        resultado_max = ecuacion.subs(x, max_result)
-        
-        return resultado_min, resultado_max
-
-    @staticmethod
-    def convertir_hijos(hijos, min_resultado, max_resultado, minimo, maximo, bits, ecuacion):
-        individuos = []
-        for i, hijo in enumerate(hijos):
-            id = i
-            individuo = hijo
-            i = int(''.join(map(str, individuo)), 2)
-            individuos.append(Individuo(id, individuo, i, min_resultado, max_resultado, minimo, maximo, bits, ecuacion))
-        return individuos
 
 
 class AlgoritmoGenetico:
-    def __init__(self, poblacion_inicial, min_resultado, max_resultado, minimo, maximo, bits, ecuacion):
-        self.poblacion = self.inicializar_poblacion(poblacion_inicial, min_resultado, max_resultado, minimo, maximo, bits, ecuacion)
+        def __init__(self, minimo, maximo, delta_deseada,ecuacion,initial_population, limit_population, probabilidad_cruce, individual_mutation, gene_mutation, iteraciones, porcentaje_cruza_value, maximizar):
+            self.ejecutar_algoritmo(minimo, maximo, delta_deseada, ecuacion, initial_population, limit_population, probabilidad_cruce, individual_mutation, gene_mutation, iteraciones, porcentaje_cruza_value, maximizar)
+        
+        def inicializar_populacion(self, minimo, maximo, delta_deseada, ecuacion, initial_population):
+            poblacion = []
+            for _ in range(initial_population):
+                # Generar un número binario aleatorio de longitud n
+                bits = Individuo.calcular_bits(self,minimo, maximo, delta_deseada)
+                individuo_binario = "".join(str(random.randint(0, 1)) for _ in range(bits))
 
-    def inicializar_poblacion(self, poblacion_inicial, min_resultado, max_resultado, minimo, maximo, bits, ecuacion):
-        poblacion = []
-        for i in range(poblacion_inicial):
-            id = i
-            individuo = [random.randint(0, 1) for _ in range(bits)]  
-            i = int(''.join(map(str, individuo)), 2) 
-            poblacion.append(Individuo(id, individuo, i, min_resultado, max_resultado, minimo, maximo, bits, ecuacion))
-        return poblacion
-    
-    def seleccionar_padres(self, poblacion, porcentaje_cruce):
-        poblacion_ordenada = sorted(poblacion, key=lambda x: x.fx)
-        num_seleccionados = int(len(poblacion) * porcentaje_cruce)
-        mejores_individuos = poblacion_ordenada[:num_seleccionados]
-        parejas = []
-        for i in range(0, len(mejores_individuos), 2):
-            pareja = mejores_individuos[i:i+2]
-            if len(pareja) == 2:
-                parejas.append(pareja)
-        print("Parejas seleccionadas:")
-        for i, pareja in enumerate(parejas):
-            print(f"Pareja {i+1}: Individuo {pareja[0].i}, Individuo {pareja[1].i}")
-        return parejas
-    
-    def cruza(self, parejas, prob_cruza):
-        hijos = []
-        for pareja in parejas:
-            hijo = []
-            if random.random() < prob_cruza:
-                punto_cruza = random.randint(1, len(pareja[0].individuo) - 1)
-                hijo.extend(pareja[0].individuo[:punto_cruza])
-                hijo.extend(pareja[1].individuo[punto_cruza:])
-                hijos.append(hijo)
-        print("Hijos:")
-        for i, hijo in enumerate(hijos):
-            print(f"Hijo {i+1}: {hijo}")
-        return hijos
-    
-    def mutex(self, hijos, prob_mutacion_individuo, prob_mutacion_gen):
-        for hijo in hijos:
-            if random.random() < prob_mutacion_individuo:
-                for i in range(len(hijo)):
-                    if random.random() < prob_mutacion_gen:
-                        hijo[i] = 1 if hijo[i] == 0 else 0
-        print("Mutación:")
-        for i, hijo in enumerate(hijos):
-            print(f"Hijo {i+1}: {hijo}")
-        return hijos
-    
-    def ejecutar(self, num_iteraciones, equation_value, min_result, max_result, initial_population_value, entry_prob_cruza_value, limit_population_value, individual_mutation_value, gene_mutation_value, tree):
-        porcentaje_cruce = 0.5  # Algunos o todos para cruzar
+                # Convertir el número binario a decimal
+                i = int(individuo_binario, 2)
+                individuo = Individuo(individuo_binario, i, minimo, maximo, delta_deseada, ecuacion)
+                individuo.individuo = individuo_binario  # asignar el número binario al individuo
 
-        for _ in range(num_iteraciones):
-            print("Iteración:", _+1)
-            minimo, maximo = Individuo.obtener_minimo_maximo(equation_value, min_result, max_result)
-            print("minimo",minimo,"maximo:", maximo)
+                poblacion.append(individuo)
+                print("Individuo creado:")
+                print("ID:", individuo.id)
+                print("Individuo:", individuo.individuo)
+                print("i:", individuo.i)
+                print("x:", individuo.x)
+                print("fx:", individuo.fx)
+                print("--------------------")
+            return poblacion
+        
+        def seleccionar_mejores(self, poblacion, porcentaje_cruce, maximizar):
+            if maximizar:
+                poblacion_ordenada = sorted(poblacion, key=lambda x: x.fx, reverse=True)
+            else:
+                poblacion_ordenada = sorted(poblacion, key=lambda x: x.fx)
 
-            if _ == 0:
-                insertar_datos(tree, self.poblacion)
-                print("Población inicial:")
-                for individuo in self.poblacion:
-                    print(individuo.individuo,individuo.i, individuo.x, individuo.fx)
+            num_seleccionados = int(len(poblacion) * porcentaje_cruce)
+            mejores_individuos = poblacion_ordenada[:num_seleccionados]
+            parejas = []
+            parejas_formadas = set()
 
-            seleccionar_padres = self.seleccionar_padres(self.poblacion, porcentaje_cruce)
-            cruza = self.cruza(seleccionar_padres, entry_prob_cruza_value)
-            mutex = self.mutex(cruza, individual_mutation_value, gene_mutation_value)
-            individuos_hijos = Individuo.convertir_hijos(mutex, min_result, max_result, minimo, maximo, 5, equation_value)
-            
-            insertar_datos(tree, individuos_hijos, es_poblacion_inicial=False)
-            self.poblacion.extend(individuos_hijos)  # Agrega los hijos a la población existente
+            # Mientras haya suficientes individuos para formar una pareja
+            while len(mejores_individuos) >= 2:
+                # El mejor individuo es siempre el primero de la lista
+                mejor_individuo = mejores_individuos[0]
+                # Para cada uno de los otros individuos
+                for otro_individuo in mejores_individuos[1:]:
+                    # Forma una pareja con el mejor individuo
+                    pareja = (mejor_individuo.i, otro_individuo.i)
+                    # Verifica que la pareja no se haya formado antes
+                    if pareja not in parejas_formadas:
+                        parejas_formadas.add(pareja)
+                        parejas.append((mejor_individuo, otro_individuo))
+                # Elimina el mejor individuo de la lista de mejores individuos
+                mejores_individuos.remove(mejor_individuo)
 
-            """ # Si la población se vuelve demasiado grande, puedes eliminar algunos individuos
-            if len(self.poblacion) > limit_population_value:
-                self.poblacion = self.seleccionar_mejores(self.poblacion, limit_population_value) """
+            print("Parejas seleccionadas:")
+            for i, pareja in enumerate(parejas):
+                print(f"Pareja {i+1}: Individuo {pareja[0].i}, Individuo {pareja[1].i}")
+
+            return parejas
+        
+       
+        def ejecutar_algoritmo(self, minimo, maximo, delta_deseada, ecuacion, initial_population, limit_population, probabilidad_cruce, individual_mutation, gene_mutation, iteraciones, porcentaje_cruza_value, maximizar):
+            poblacion = self.inicializar_populacion(minimo, maximo, delta_deseada, ecuacion, initial_population)
+            print("maximizar->",maximizar)
+            generaciones = [poblacion]
+            for _ in range(iteraciones):
+                print("Generación:", _+1)
+                parejas = self.seleccionar_mejores(poblacion, porcentaje_cruza_value, maximizar)
+                poblacion = [individuo for pareja in parejas for individuo in pareja]
+                # poblacion = self.cruzar_poblacion(poblacion, probabilidad_cruce)
+                # poblacion = self.mutar_poblacion(poblacion, individual_mutation, gene_mutation)
+                generaciones.append(poblacion) 
+            print("Población final:")
+            for i, generacion in enumerate(generaciones):
+                print(f"Generación {i+1}:")
+                for individuo in generacion:
+                    print(individuo)
+            # insertar_datos(poblacion)
+            return generaciones
