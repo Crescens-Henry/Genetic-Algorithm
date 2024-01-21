@@ -1,9 +1,12 @@
 import math
 import random
+import time
 from matplotlib import pyplot as plt
+import numpy as np
 from sympy import cos, sin, symbols, rad, sympify
 import sympy as sp
-from Layout.Models import LineChart
+from Layout.Models import LineChart 
+from Layout.Models.grabarPlots import animarPlot, grabarVideo, unirVariosVideos, reproducirVideo
 from Layout.Models.Table import insertar_datos
 import random
 
@@ -189,7 +192,10 @@ class AlgoritmoGenetico:
 
         def ejecutar_algoritmo(self, minimo, maximo, delta_deseada, ecuacion, initial_population, limit_population, individual_mutation, gene_mutation, iteraciones, porcentaje_cruza_value, maximizar,tree):
             fig, ax = plt.subplots()
-            
+            t = np.linspace(0,2*np.pi,101)
+            listaAnimaciones = []
+            listaVideos = []
+            inicio = time.time()
             mejores_resultados = []
             promedio_resultados = []
             peores_resultados = []
@@ -216,7 +222,18 @@ class AlgoritmoGenetico:
                     else:
                         mejor_resultado = min(individuo.fx for individuo in self.poblacion_final)
                         peor_resultado = max(individuo.fx for individuo in self.poblacion_final) 
-                    promedio_resultado = sum(individuo.fx for individuo in self.poblacion_final) / len(self.poblacion_final)               
+                    promedio_resultado = sum(individuo.fx for individuo in self.poblacion_final) / len(self.poblacion_final)
+                
+                    x_values_x = [float(individuo.x) for individuo in self.poblacion_final]
+                    fx_values_y = [float(individuo.fx) for individuo in self.poblacion_final]
+                    print("x_values_x", x_values_x)
+                    print("fx_values_y", fx_values_y)
+                    listaAnimaciones.append(animarPlot(x_values_x, fx_values_y))
+                    if len(listaAnimaciones) == 0:
+                        print("No se generaron frames para la animación.")
+                nombre_video = "video" + str(_+1) + ".mp4"
+                listaVideos.append(nombre_video)
+                
                 poblacion = poblacion_mutada  # Actualiza la población con los individuos mutados
                 self.poblacion_final = self.podar_poblacion(self.poblacion_final, limit_population, maximizar)
 
@@ -224,6 +241,12 @@ class AlgoritmoGenetico:
                 mejores_resultados.append(mejor_resultado)
                 promedio_resultados.append(promedio_resultado)
                 peores_resultados.append(peor_resultado)
+            
+            unirVariosVideos(listaAnimaciones, listaVideos)
+            fin = time.time()
+            tiempo_ejecucion = fin - inicio
+            print("Tiempo de ejecución:", tiempo_ejecucion, "segundos")
+            
             # Insertar los resultados de la poda en la tabla
             insertar_datos(tree, self.poblacion_final, es_poblacion_inicial=False)
             x_values = list(range(iteraciones))
