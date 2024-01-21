@@ -20,6 +20,9 @@ class Individuo:
         
     def __str__(self):
         return str(self.individuo)
+    
+    def __repr__(self):
+        return f'Individuo(individuo binario={self.individuo}, decimal={self.i})'
 
     def calcular_bits (self, minimo, maximo, delta_deseada):
         rango = maximo-minimo
@@ -53,7 +56,6 @@ class Individuo:
             resultado = sympify(ecuacion).subs(var, x_value)
             # Evaluar la expresión
             resultado = resultado.evalf()
-            print("Resultado de la ecuación:", resultado)
             return resultado
         except Exception as e:
             print("Error al calcular fx:", e)
@@ -84,11 +86,11 @@ class AlgoritmoGenetico:
             return poblacion
         
         def seleccionar_mejores(self, poblacion, porcentaje_cruce, maximizar):
-            # print("Población que estoy recibiendo:")
-            # for individuo in poblacion:
-            #     print("Individuo (i):", individuo.i)
-            #     print("Individuo (fx):", individuo.fx)
-            #     print("--------------------")
+            """ print("Población que estoy recibiendo:")
+            for individuo in poblacion:
+                print("Individuo (i):", individuo.i)
+                print("Individuo (fx):", individuo.fx)
+                print("--------------------") """
 
             poblacion = [x for x in poblacion if not isinstance(x, list)]
             if maximizar:
@@ -101,29 +103,30 @@ class AlgoritmoGenetico:
             parejas = []
             parejas_formadas = set()
 
-            # Mientras haya suficientes individuos para formar una pareja
-            while len(mejores_individuos) >= 2:
-                # El mejor individuo es siempre el primero de la lista
-                mejor_individuo = mejores_individuos[0]
-                # Para cada uno de los otros individuos
-                for otro_individuo in mejores_individuos[1:]:
-                    # Forma una pareja con el mejor individuo
-                    pareja = (mejor_individuo.i, otro_individuo.i)
+            # Para cada uno de los individuos en la lista de mejores individuos
+            for i in range(0, len(mejores_individuos), 2):
+                # Si hay un individuo siguiente para formar una pareja
+                if i+1 < len(mejores_individuos):
+                    # Forma una pareja con el individuo actual y el siguiente
+                    pareja = (mejores_individuos[i].i, mejores_individuos[i+1].i)
                     # Verifica que la pareja no se haya formado antes
                     if pareja not in parejas_formadas:
                         parejas_formadas.add(pareja)
-                        parejas.append((mejor_individuo, otro_individuo))
-                # Elimina el mejor individuo de la lista de mejores individuos
-                mejores_individuos.remove(mejor_individuo)
+                        parejas.append((mejores_individuos[i], mejores_individuos[i+1]))
 
-            # # Imprime las parejas en la consola
-            # for pareja in parejas:
-            #     print("Pareja:")
-            #     print("Individuo 1 (binario):", pareja[0].individuo)
-            #     print("Individuo 1 (i):", pareja[0].i)
-            #     print("Individuo 2 (binario):", pareja[1].individuo)
-            #     print("Individuo 2 (i):", pareja[1].i)
-            #     print("--------------------")
+            """ # Si quedó un individuo sin pareja, lo agregamos a la última pareja formada
+            if len(mejores_individuos) % 2 != 0:
+                ultima_pareja = parejas[-1]
+                parejas[-1] = (*ultima_pareja, mejores_individuos[-1]), """
+
+            # Imprime las parejas en la consola
+            for pareja in parejas:
+                print("Pareja:")
+                print("Individuo 1 (binario):", pareja[0].individuo)
+                print("Individuo 1 (i):", pareja[0].i)
+                print("Individuo 2 (binario):", pareja[1].individuo)
+                print("Individuo 2 (i):", pareja[1].i)
+                print("--------------------")
 
             return parejas
         
@@ -166,6 +169,7 @@ class AlgoritmoGenetico:
             return descendientes
 
         def mutar_poblacion(self, poblacion, individual_mutation, gene_mutation):
+
             for i in range(len(poblacion)):
                 if random.random() < individual_mutation:
                     poblacion[i] = [1 if bit == 0 else 0 for bit in poblacion[i]]
@@ -174,6 +178,7 @@ class AlgoritmoGenetico:
                 for j in range(len(poblacion[i])):
                     if random.random() < gene_mutation:
                         poblacion[i][j] = 1 if poblacion[i][j] == 0 else 0
+
             return poblacion
         
         def podar_poblacion(self, poblacion_final, limit_population, maximizar):
@@ -196,20 +201,23 @@ class AlgoritmoGenetico:
             poblacion = self.inicializar_populacion(minimo, maximo, delta_deseada, ecuacion, initial_population)
             insertar_datos(tree, poblacion, es_poblacion_inicial=True)
             
-            # Agregar la población inicial a poblacion_final
             self.poblacion_final.extend(poblacion)
+            
+            todas_las_generaciones = []
         
             for _ in range(iteraciones):
                 print("calculando generacion num ->", _+1)
-                parejas = self.seleccionar_mejores(self.poblacion_final, porcentaje_cruza_value, maximizar)  # Selecciona de la población final
+                parejas = self.seleccionar_mejores(self.poblacion_final, porcentaje_cruza_value, maximizar) 
+                print(f'Parejas en la generación {_+1}:\n {parejas}')
                 cruza = self.cruzar(parejas)
                 poblacion_mutada = self.mutar_poblacion(cruza, individual_mutation, gene_mutation)
                 
-                # Crear nuevos objetos Individuo a partir de la población mutada y agregarlos a poblacion_final
+                generacion_actual = []
                 for individuo_binario in poblacion_mutada:
                     individuo = Individuo(individuo_binario, minimo, maximo, delta_deseada, ecuacion)
                     self.poblacion_final.append(individuo)
-                    # Calcular el mejor, el promedio y el peor resultado de la iteración actual
+                    generacion_actual.append(individuo)
+                    
                     if maximizar:
                         mejor_resultado = max(individuo.fx for individuo in self.poblacion_final)
                         peor_resultado = min(individuo.fx for individuo in self.poblacion_final)
@@ -217,18 +225,24 @@ class AlgoritmoGenetico:
                         mejor_resultado = min(individuo.fx for individuo in self.poblacion_final)
                         peor_resultado = max(individuo.fx for individuo in self.poblacion_final) 
                     promedio_resultado = sum(individuo.fx for individuo in self.poblacion_final) / len(self.poblacion_final)               
-                poblacion = poblacion_mutada  # Actualiza la población con los individuos mutados
-                self.poblacion_final = self.podar_poblacion(self.poblacion_final, limit_population, maximizar)
+                poblacion = poblacion_mutada 
 
-                # Agregar los resultados a las listas
                 mejores_resultados.append(mejor_resultado)
                 promedio_resultados.append(promedio_resultado)
                 peores_resultados.append(peor_resultado)
-            # Insertar los resultados de la poda en la tabla
+                
+                todas_las_generaciones.append(generacion_actual)
+                for i, generacion in enumerate(todas_las_generaciones):
+                    print(f"Generación {i+1}:")
+                    for individuo in generacion:
+                        print("individuo creado/resultante: ", individuo)
+                    print("\n")  # Imprimir una línea en blanco entre generaciones
+                
+            self.poblacion_final = self.podar_poblacion(self.poblacion_final, limit_population, maximizar)
             insertar_datos(tree, self.poblacion_final, es_poblacion_inicial=False)
             x_values = list(range(iteraciones))
             LineChart.update_graph(x_values, mejores_resultados, promedio_resultados, peores_resultados, ax)
-            plt.show()  # Asegúrate de llamar a plt.show() para mostrar la gráfica
+            plt.show()  
             
             print("Población final:")
             for individuo in self.poblacion_final:
