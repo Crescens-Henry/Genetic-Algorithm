@@ -4,6 +4,7 @@ from matplotlib import pyplot as plt
 from sympy import cos, sin, symbols, rad, sympify
 import sympy as sp
 from Layout.Models import LineChart
+from Layout.Models.PlotGenerations import plot_generation
 from Layout.Models.Table import insertar_datos
 import random
 
@@ -53,7 +54,6 @@ class Individuo:
             resultado = sympify(ecuacion).subs(var, x_value)
             # Evaluar la expresión
             resultado = resultado.evalf()
-            print("Resultado de la ecuación:", resultado)
             return resultado
         except Exception as e:
             print("Error al calcular fx:", e)
@@ -204,11 +204,13 @@ class AlgoritmoGenetico:
                 parejas = self.seleccionar_mejores(self.poblacion_final, porcentaje_cruza_value, maximizar)  # Selecciona de la población final
                 cruza = self.cruzar(parejas)
                 poblacion_mutada = self.mutar_poblacion(cruza, individual_mutation, gene_mutation)
-                
+                # Crear una lista para guardar los individuos de la generación actual
+                generacion_actual = []
                 # Crear nuevos objetos Individuo a partir de la población mutada y agregarlos a poblacion_final
                 for individuo_binario in poblacion_mutada:
                     individuo = Individuo(individuo_binario, minimo, maximo, delta_deseada, ecuacion)
                     self.poblacion_final.append(individuo)
+                    generacion_actual.append(individuo)
                     # Calcular el mejor, el promedio y el peor resultado de la iteración actual
                     if maximizar:
                         mejor_resultado = max(individuo.fx for individuo in self.poblacion_final)
@@ -216,7 +218,8 @@ class AlgoritmoGenetico:
                     else:
                         mejor_resultado = min(individuo.fx for individuo in self.poblacion_final)
                         peor_resultado = max(individuo.fx for individuo in self.poblacion_final) 
-                    promedio_resultado = sum(individuo.fx for individuo in self.poblacion_final) / len(self.poblacion_final)               
+                    promedio_resultado = sum(individuo.fx for individuo in self.poblacion_final) / len(self.poblacion_final)           
+    
                 poblacion = poblacion_mutada  # Actualiza la población con los individuos mutados
                 self.poblacion_final = self.podar_poblacion(self.poblacion_final, limit_population, maximizar)
 
@@ -224,6 +227,11 @@ class AlgoritmoGenetico:
                 mejores_resultados.append(mejor_resultado)
                 promedio_resultados.append(promedio_resultado)
                 peores_resultados.append(peor_resultado)
+                
+                plot_generation(_, self.poblacion_final)
+                # print("x ->", 
+                #       [individuo.x for individuo in self.poblacion_final], "\nfx ->",
+                #       [individuo.fx for individuo in self.poblacion_final])
             # Insertar los resultados de la poda en la tabla
             insertar_datos(tree, self.poblacion_final, es_poblacion_inicial=False)
             x_values = list(range(iteraciones))
