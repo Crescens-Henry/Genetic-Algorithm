@@ -108,12 +108,14 @@ def Interface():
         porcentaje_cruza_value = float(porcentaje_cruza.get())
         
         AlgoritmoGenetico(minimo, maximo, delta_deseada_value, equation_value, initial_population_value, limit_population_value, individual_mutation_value, gene_mutation_value, iteration, porcentaje_cruza_value, maximizar,tree)
+        
 
     button = ttk.Button(frame_init, text="Minimizacion",
                         command=minimizar)
     button.grid(column=2, row=1, sticky=tk.W, padx=5, pady=5)
 
     def maximizar():
+        # Crear una figura y los ejes
         AlgoritmoGenetico.poblacion_final = []
         tree.delete(*tree.get_children())
         maximizar = True
@@ -132,7 +134,7 @@ def Interface():
         gene_mutation_value = float(gene_mutation.get())
         porcentaje_cruza_value = float(porcentaje_cruza.get())
         
-        AlgoritmoGenetico(minimo, maximo, delta_deseada_value, equation_value, initial_population_value, limit_population_value, individual_mutation_value, gene_mutation_value, iteration, porcentaje_cruza_value, maximizar)
+        AlgoritmoGenetico(minimo, maximo, delta_deseada_value, equation_value, initial_population_value, limit_population_value, individual_mutation_value, gene_mutation_value, iteration, porcentaje_cruza_value, maximizar,tree)
         
 
 

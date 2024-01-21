@@ -1,7 +1,9 @@
 import math
 import random
+from matplotlib import pyplot as plt
 from sympy import cos, sin, symbols, rad, sympify
 import sympy as sp
+from Layout.Models import LineChart
 from Layout.Models.Table import insertar_datos
 import random
 
@@ -183,7 +185,14 @@ class AlgoritmoGenetico:
             
             return poblacion_final
         
+        
+
         def ejecutar_algoritmo(self, minimo, maximo, delta_deseada, ecuacion, initial_population, limit_population, individual_mutation, gene_mutation, iteraciones, porcentaje_cruza_value, maximizar,tree):
+            fig, ax = plt.subplots()
+            
+            mejores_resultados = []
+            promedio_resultados = []
+            peores_resultados = []
             poblacion = self.inicializar_populacion(minimo, maximo, delta_deseada, ecuacion, initial_population)
             insertar_datos(tree, poblacion, es_poblacion_inicial=True)
             
@@ -200,12 +209,24 @@ class AlgoritmoGenetico:
                 for individuo_binario in poblacion_mutada:
                     individuo = Individuo(individuo_binario, minimo, maximo, delta_deseada, ecuacion)
                     self.poblacion_final.append(individuo)
+                    # Calcular el mejor, el promedio y el peor resultado de la iteración actual
+                    mejor_resultado = max(individuo.fx for individuo in self.poblacion_final)
+                    promedio_resultado = sum(individuo.fx for individuo in self.poblacion_final) / len(self.poblacion_final)
+                    peor_resultado = min(individuo.fx for individuo in self.poblacion_final)
                 
                 poblacion = poblacion_mutada  # Actualiza la población con los individuos mutados
                 self.poblacion_final = self.podar_poblacion(self.poblacion_final, limit_population, maximizar)
+
+                # Agregar los resultados a las listas
+                mejores_resultados.append(mejor_resultado)
+                promedio_resultados.append(promedio_resultado)
+                peores_resultados.append(peor_resultado)
             # Insertar los resultados de la poda en la tabla
             insertar_datos(tree, self.poblacion_final, es_poblacion_inicial=False)
-
+            x_values = list(range(iteraciones))
+            LineChart.update_graph(x_values, mejores_resultados, promedio_resultados, peores_resultados, ax)
+            plt.show()  # Asegúrate de llamar a plt.show() para mostrar la gráfica
+            
             print("Población final:")
             for individuo in self.poblacion_final:
                 print(individuo.id, individuo.individuo ,individuo.i, individuo.x, individuo.fx)
