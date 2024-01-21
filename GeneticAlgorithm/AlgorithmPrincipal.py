@@ -210,10 +210,13 @@ class AlgoritmoGenetico:
                     individuo = Individuo(individuo_binario, minimo, maximo, delta_deseada, ecuacion)
                     self.poblacion_final.append(individuo)
                     # Calcular el mejor, el promedio y el peor resultado de la iteración actual
-                    mejor_resultado = max(individuo.fx for individuo in self.poblacion_final)
-                    promedio_resultado = sum(individuo.fx for individuo in self.poblacion_final) / len(self.poblacion_final)
-                    peor_resultado = min(individuo.fx for individuo in self.poblacion_final)
-                
+                    if maximizar:
+                        mejor_resultado = max(individuo.fx for individuo in self.poblacion_final)
+                        peor_resultado = min(individuo.fx for individuo in self.poblacion_final)
+                    else:
+                        mejor_resultado = min(individuo.fx for individuo in self.poblacion_final)
+                        peor_resultado = max(individuo.fx for individuo in self.poblacion_final) 
+                    promedio_resultado = sum(individuo.fx for individuo in self.poblacion_final) / len(self.poblacion_final)               
                 poblacion = poblacion_mutada  # Actualiza la población con los individuos mutados
                 self.poblacion_final = self.podar_poblacion(self.poblacion_final, limit_population, maximizar)
 
