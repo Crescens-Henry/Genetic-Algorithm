@@ -48,12 +48,12 @@ class Individuo:
     def calcular_fx(self, ecuacion):
         try:
             var = sp.symbols('x')
-            # Verificar si la ecuación contiene alguna función trigonométrica
-            if 'sin' in ecuacion or 'cos' in ecuacion or 'tan' in ecuacion:
-                # Convertir self.x a radianes
-                x_value = math.radians(self.x)
-            else:
-                x_value = self.x
+            # # Verificar si la ecuación contiene alguna función trigonométrica
+            # if 'sin' in ecuacion or 'cos' in ecuacion or 'tan' in ecuacion:
+            #     # Convertir self.x a radianes
+            #     x_value = math.radians(self.x)
+            # else:
+            x_value = self.x
             # Convertir la ecuación a una expresión sympy y sustituir la variable por su valor
             resultado = sympify(ecuacion).subs(var, x_value)
             # Evaluar la expresión
@@ -216,13 +216,11 @@ class AlgoritmoGenetico:
                 print(f'Parejas en la generación {_+1}:\n {parejas}')
                 cruza = self.cruzar(parejas)
                 poblacion_mutada = self.mutar_poblacion(cruza, individual_mutation, gene_mutation)
-                generacion_actual = []
                 
                 for individuo_binario in poblacion_mutada:
                     mejor_resultado, promedio_resultado, peor_resultado = None, None, None
                     individuo = Individuo(individuo_binario, minimo, maximo, delta_deseada, ecuacion)
                     self.poblacion_final.append(individuo)
-                    generacion_actual.append(individuo)
                     
                     if maximizar:
                         mejor_resultado = max(individuo.fx for individuo in self.poblacion_final)
@@ -238,17 +236,12 @@ class AlgoritmoGenetico:
                 peores_resultados.append(peor_resultado)
                 
                 
-                todas_las_generaciones.append(generacion_actual)
                 for i, generacion in enumerate(todas_las_generaciones):
                     print(f"Generación {i+1}:")
                     for individuo in generacion:
                         print("individuo creado/resultante: ", individuo)
                     print("\n")  # Imprimir una línea en blanco entre generaciones
                 
-                Graphics.crear_grafica(generacion_actual, directorio, _+1, maximizar)
-                
-            Graphics.crear_video(directorio, "generaciones")
-            Graphics.ejecutar_video('generaciones')
             self.poblacion_final = self.podar_poblacion(self.poblacion_final, limit_population, maximizar)
             insertar_datos(tree, self.poblacion_final, es_poblacion_inicial=False)
             x_values = list(range(iteraciones))
