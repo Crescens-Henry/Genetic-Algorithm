@@ -1,9 +1,11 @@
 import math
+import os
 import random
+from tkinter import Tk
 from matplotlib import pyplot as plt
 from sympy import cos, sin, symbols, rad, sympify
 import sympy as sp
-from Layout.Models import LineChart
+from Layout.Models import Graphics
 from Layout.Models.Table import insertar_datos
 import random
 
@@ -194,7 +196,10 @@ class AlgoritmoGenetico:
 
         def ejecutar_algoritmo(self, minimo, maximo, delta_deseada, ecuacion, initial_population, limit_population, individual_mutation, gene_mutation, iteraciones, porcentaje_cruza_value, maximizar,tree):
             fig, ax = plt.subplots()
-            
+            directorio = 'Layout\Models\Generations/'
+                    # Crear el directorio si no existe
+            if not os.path.exists(directorio):
+                os.makedirs(directorio)
             mejores_resultados = []
             promedio_resultados = []
             peores_resultados = []
@@ -211,9 +216,10 @@ class AlgoritmoGenetico:
                 print(f'Parejas en la generación {_+1}:\n {parejas}')
                 cruza = self.cruzar(parejas)
                 poblacion_mutada = self.mutar_poblacion(cruza, individual_mutation, gene_mutation)
-                
                 generacion_actual = []
+                
                 for individuo_binario in poblacion_mutada:
+                    mejor_resultado, promedio_resultado, peor_resultado = None, None, None
                     individuo = Individuo(individuo_binario, minimo, maximo, delta_deseada, ecuacion)
                     self.poblacion_final.append(individuo)
                     generacion_actual.append(individuo)
@@ -231,6 +237,7 @@ class AlgoritmoGenetico:
                 promedio_resultados.append(promedio_resultado)
                 peores_resultados.append(peor_resultado)
                 
+                
                 todas_las_generaciones.append(generacion_actual)
                 for i, generacion in enumerate(todas_las_generaciones):
                     print(f"Generación {i+1}:")
@@ -238,14 +245,18 @@ class AlgoritmoGenetico:
                         print("individuo creado/resultante: ", individuo)
                     print("\n")  # Imprimir una línea en blanco entre generaciones
                 
+                Graphics.crear_grafica(generacion_actual, directorio, _+1, maximizar)
+                
+            Graphics.crear_video(directorio, "generaciones")
+            Graphics.ejecutar_video('generaciones')
             self.poblacion_final = self.podar_poblacion(self.poblacion_final, limit_population, maximizar)
             insertar_datos(tree, self.poblacion_final, es_poblacion_inicial=False)
             x_values = list(range(iteraciones))
-            LineChart.update_graph(x_values, mejores_resultados, promedio_resultados, peores_resultados, ax)
-            plt.show()  
+            Graphics.update_graph(x_values, mejores_resultados, promedio_resultados, peores_resultados, ax)
             
             print("Población final:")
             for individuo in self.poblacion_final:
                 print(individuo.id, individuo.individuo ,individuo.i, individuo.x, individuo.fx)
             
+
             return self.poblacion_final
