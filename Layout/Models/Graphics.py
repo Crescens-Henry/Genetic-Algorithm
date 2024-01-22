@@ -42,7 +42,7 @@ def crear_grafica(generacion_actual, directorio, generacion, maximizar):
     plt.scatter([res[0] for res in otros_resultados], [res[1] for res in otros_resultados], color='b', label='Otros resultados')
     plt.xlabel('X')
     plt.ylabel('Y')
-    plt.title('Generacion: ' + generacion)
+    plt.title('Generacion: ' + str(generacion))
     plt.legend()
     plt.savefig(f'{directorio}/generacion_{generacion}.png')
     plt.close()
