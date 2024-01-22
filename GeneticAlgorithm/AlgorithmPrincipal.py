@@ -49,11 +49,11 @@ class Individuo:
         try:
             var = sp.symbols('x')
             # Verificar si la ecuación contiene alguna función trigonométrica
-            if 'sin' in ecuacion or 'cos' in ecuacion or 'tan' in ecuacion:
-                # Convertir self.x a radianes
-                x_value = math.radians(self.x)
-            else:
-                x_value = self.x
+            # if 'sin' in ecuacion or 'cos' in ecuacion or 'tan' in ecuacion:
+            #     # Convertir self.x a radianes
+            #     x_value = math.radians(self.x)
+            # else:
+            x_value = self.x
             # Convertir la ecuación a una expresión sympy y sustituir la variable por su valor
             resultado = sympify(ecuacion).subs(var, x_value)
             # Evaluar la expresión
