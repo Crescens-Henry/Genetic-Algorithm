@@ -52,7 +52,6 @@ class Individuo:
             resultado = sympify(ecuacion).subs(var, x_value)
             # Evaluar la expresión
             resultado = resultado.evalf()
-            print("Resultado de la ecuación:", resultado)
             return resultado
         except Exception as e:
             print("Error al calcular fx:", e)
@@ -199,7 +198,7 @@ class AlgoritmoGenetico:
             fin = time.time()
             tiempo_ejecucion = fin - inicio
             print("Tiempo de ejecución:", tiempo_ejecucion, "segundos")
-            reproducirVideo("video_final.mp4")
+            reproducirVideo("Crescencio_Pérez_Santiz_213477.mp4")
             
             insertar_datos(tree, self.poblacion_final, es_poblacion_inicial=False)
             x_values = list(range(iteraciones))

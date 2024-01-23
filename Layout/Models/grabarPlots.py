@@ -12,6 +12,7 @@ def animarPlot(x,y):
 
         ax.set_xlim([1.1*np.min(x),1.1*np.max(x)])
         ax.set_ylim([1.1*np.min(y),1.1*np.max(y)])
+        ax.text(0.5, 0.95,"sin(x)+cos(x) Codigo de Crescencio", transform=ax.transAxes, ha='center', va='top')
     animar = FuncAnimation(fig, actualizarPlot,range(len(x)),interval=0, cache_frame_data=False, repeat = False)
     return fig, animar
 
@@ -33,7 +34,7 @@ def unirVariosVideos(listaAnimaciones, listaVideos):
     alto = int(videos[0].get(cv.CAP_PROP_FRAME_HEIGHT))
     fps = int(videos[0].get(cv.CAP_PROP_FPS))
     fourcc = cv.VideoWriter_fourcc(*'mp4v')
-    video_combinado = cv.VideoWriter('video_final.mp4', fourcc, fps, (ancho, alto))
+    video_combinado = cv.VideoWriter('Crescencio_Pérez_Santiz_213477.mp4', fourcc, fps, (ancho, alto))
 
     for video in videos:
         while True:

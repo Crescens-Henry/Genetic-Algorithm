@@ -30,24 +30,25 @@ def Interface():
     max_result_entry.insert(0, "25")
     max_result_entry.grid(column=1, row=3, sticky=(tk.W, tk.E), pady=1)
 
-    ttk.Label(frame_init, text="Delta:").grid(
-        column=0, row=5, sticky=tk.W, pady=1)
-    delta_deseada = ttk.Entry(frame_init, width=entry_width)
-    delta_deseada.insert(0, "0.3")
-    delta_deseada.grid(column=1, row=5, sticky=(tk.W, tk.E), pady=1)
-    
     ttk.Label(frame_init, text="Generaciones:").grid(
         column=0, row=4, sticky=tk.W, pady=1)
     iteraciones = ttk.Entry(frame_init, width=entry_width)
-    iteraciones.insert(0, "100")
+    iteraciones.insert(0, "10")
     iteraciones.grid(column=1, row=4, sticky=(tk.W, tk.E), pady=1)
+    
+    ttk.Label(frame_init, text="Delta:").grid(
+        column=0, row=5, sticky=tk.W, pady=1)
+    delta_deseada = ttk.Entry(frame_init, width=entry_width)
+    delta_deseada.insert(0, "0.6")
+    delta_deseada.grid(column=1, row=5, sticky=(tk.W, tk.E), pady=1)
+    
 
 
     frame_poblacion = section(root, "Tamaño de la Población")
     ttk.Label(frame_poblacion, text="Tamaño Inicial:").grid(
         column=0, row=1, sticky=tk.W, pady=1)
     initial_population = ttk.Entry(frame_poblacion, width=entry_width)
-    initial_population.insert(0, "3")
+    initial_population.insert(0, "8")
     initial_population.grid(column=1, row=1, sticky=(tk.W, tk.E), pady=1)
     set_widget_width(initial_population, entry_width)
 
@@ -78,7 +79,7 @@ def Interface():
     ttk.Label(frame_cruza, text="Porcentaje de cruce:").grid(
         column=0, row=2, sticky=tk.W, pady=1)
     porcentaje_cruza = ttk.Entry(frame_cruza, width=entry_width)
-    porcentaje_cruza.insert(0, "0.9")
+    porcentaje_cruza.insert(0, "0.5")
     porcentaje_cruza.grid(column=1, row=2, sticky=(tk.W, tk.E), pady=1)
     set_widget_width(porcentaje_cruza, entry_width)
 
