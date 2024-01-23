@@ -47,11 +47,7 @@ class Individuo:
         try:
             var = sp.symbols('x')
             # Verificar si la ecuación contiene alguna función trigonométrica
-            if 'sin' in ecuacion or 'cos' in ecuacion or 'tan' in ecuacion:
-                # Convertir self.x a radianes
-                x_value = math.radians(self.x)
-            else:
-                x_value = self.x
+            x_value = self.x
             # Convertir la ecuación a una expresión sympy y sustituir la variable por su valor
             resultado = sympify(ecuacion).subs(var, x_value)
             # Evaluar la expresión
@@ -199,17 +195,17 @@ class AlgoritmoGenetico:
                 promedio_resultados.append(promedio_resultado)
                 peores_resultados.append(peor_resultado)
             
-            insertar_datos(tree, self.poblacion_final, es_poblacion_inicial=False)
-            x_values = list(range(iteraciones))
-            LineChart.update_graph(x_values, mejores_resultados, promedio_resultados, peores_resultados, ax)
-            plt.show()  # Asegúrate de llamar a plt.show() para mostrar la gráfica
-            
             unirVariosVideos(listaAnimaciones, listaVideos)
             fin = time.time()
             tiempo_ejecucion = fin - inicio
             print("Tiempo de ejecución:", tiempo_ejecucion, "segundos")
             reproducirVideo("video_final.mp4")
-            # Insertar los resultados de la poda en la tabla
+            
+            insertar_datos(tree, self.poblacion_final, es_poblacion_inicial=False)
+            x_values = list(range(iteraciones))
+            LineChart.update_graph(x_values, mejores_resultados, promedio_resultados, peores_resultados, ax)
+            plt.show() 
+            
             
             print("Población final:")
             for individuo in self.poblacion_final:
