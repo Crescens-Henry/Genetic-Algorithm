@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import numpy as np
 from Layout.Models import Graphics
 import cv2
 import imageio
@@ -8,7 +9,8 @@ import tkinter as tk
 import cv2
 from PIL import Image, ImageTk
 import threading
-# En el módulo donde se define update_graph
+from sympy import cos, sin, symbols, rad, sympify
+import sympy as sp
 def update_graph(x_values, mejores_resultados, promedio_resultados, peores_resultados, ax):
     ax.clear()
     ax.plot(x_values, mejores_resultados, label='Mejor resultado')
@@ -21,39 +23,55 @@ def update_graph(x_values, mejores_resultados, promedio_resultados, peores_resul
     plt.show()
     
 
-def crear_grafica(generacion_actual, directorio, generacion, maximizar):
-    # Obtén los valores fx y x de todos los individuos en la generación actual
-    resultados = [(individuo.x, individuo.fx) for individuo in generacion_actual]
+def crear_grafica(ecuacion, lista_generaciones, directorio, maximizar, xlim ,ylim):
+    for i, generacion_actual in enumerate(lista_generaciones):
+        resultados = [(individuo.x, individuo.fx) for individuo in generacion_actual]
 
-    # Determina el mejor y el peor resultado en función del botón que se haga clic
-    if maximizar:
-        mejor_resultado = max(resultados, key=lambda item: item[1])
-        peor_resultado = min(resultados, key=lambda item: item[1])
-    else:
-        mejor_resultado = min(resultados, key=lambda item: item[1])
-        peor_resultado = max(resultados, key=lambda item: item[1])
+        if maximizar:
+            mejor_resultado = max(resultados, key=lambda item: item[1])
+            peor_resultado = min(resultados, key=lambda item: item[1])
+        else:
+            mejor_resultado = min(resultados, key=lambda item: item[1])
+            peor_resultado = max(resultados, key=lambda item: item[1])
 
-    # Filtra los valores que no son ni el mínimo ni el máximo
-    otros_resultados = [res for res in resultados if res != mejor_resultado and res != peor_resultado]
+        otros_resultados = [res for res in resultados if res != mejor_resultado and res != peor_resultado]
 
-    fig = plt.figure(figsize=(10, 5))
-    plt.scatter([mejor_resultado[0]], [mejor_resultado[1]], color='g', label='Mejor resultado')
-    plt.scatter([peor_resultado[0]], [peor_resultado[1]], color='r', label='Peor resultado')
-    plt.scatter([res[0] for res in otros_resultados], [res[1] for res in otros_resultados], color='b', label='Otros resultados')
-    plt.xlabel('X')
-    plt.ylabel('Y')
-    plt.title('Generacion: ' + str(generacion))
-    plt.legend()
-    plt.savefig(f'{directorio}/generacion_{generacion}.png')
-    plt.close()
+        fig = plt.figure(figsize=(10, 5))
+        plt.scatter([mejor_resultado[0]], [mejor_resultado[1]], color='g', label='Mejor resultado')
+        plt.scatter([peor_resultado[0]], [peor_resultado[1]], color='r', label='Peor resultado')
+        plt.scatter([res[0] for res in otros_resultados], [res[1] for res in otros_resultados], color='b', label='Otros resultados')
+        
+        x = np.linspace(xlim[0], xlim[1], 1000)
+
+        x_symbol = sp.symbols('x')
+        ecuacion_sympy = sp.sympify(ecuacion)
+
+        y = [float(ecuacion_sympy.subs(x_symbol, x_val)) for x_val in x]
+
+        plt.plot(x, y, color='k', label='Ecuación')
+
+
+        
+        plt.xlabel('X')
+        plt.ylabel('Y')
+        plt.title('Generacion: ' + str(i+1))
+        plt.legend()
+
+        plt.xlim(xlim)
+        plt.ylim(ylim)
+        if not maximizar:
+            plt.gca().invert_yaxis()
+
+        plt.savefig(f'{directorio}/generacion_{i+1}.png')
+        plt.close()
 
 def crear_video(directorio, nombre_video):
     imagenes = [img for img in os.listdir(directorio) if img.endswith(".png")]
-    imagenes.sort()
+    imagenes = sorted(imagenes, key=lambda img: int(img.split('generacion_')[1].split('.')[0]))
     frames = []
     for imagen in imagenes:
         frames.append(imageio.imread(f'{directorio}/{imagen}'))
-    fps = 10  # Ajusta este valor para cambiar la duración del video
+    fps = 5 
     imageio.mimsave(f'{nombre_video}.mp4', frames, fps=fps)
 
 def ejecutar_video(nombre_video):
