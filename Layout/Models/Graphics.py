@@ -58,9 +58,14 @@ def crear_grafica(ecuacion, lista_generaciones, directorio, maximizar, xlim ,yli
         plt.legend()
 
         plt.xlim(xlim)
-        plt.ylim(ylim)
-        if not maximizar:
-            plt.gca().invert_yaxis()
+        # Obtén los límites actuales
+        ymin, ymax = plt.ylim()
+
+        # Define el margen que quieres agregar
+        margen = 0.2 * (ymax - ymin)  # Esto añadirá un margen del 10%
+
+        # Actualiza los límites
+        plt.ylim(ymin - margen, ymax + margen)
 
         plt.savefig(f'{directorio}/generacion_{i+1}.png')
         plt.close()
